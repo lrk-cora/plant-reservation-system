@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>植物生长记录查看</title>
+  <link rel="stylesheet" href="../css/common.css">
+  <style>
+    .log-item{
+      display:flex;
+      gap:20px;
+      padding:20px;
+      border-bottom:1px solid #eee;
+      align-items:flex-start;
+    }
+    .log-img{
+      width:200px;
+      height:160px;
+      object-fit:cover;
+      border-radius:8px;
+    }
+  </style>
+</head>
+<body>
+<header class="header-nav">
+  <div class="container nav-wrap">
+    <a href="index.html" class="logo">植愈空间</a>
+    <ul class="nav-links">
+      <li><a href="index.html">首页</a></li>
+      <li><a href="plant-list.html">全部植物</a></li>
+      <li><a href="user-center.html">我的预约</a></li>
+    </ul>
+  </div>
+</header>
+
+<main class="container" style="padding:40px 0;max-width:900px;">
+  <h2 id="plantName" style="margin-bottom:30px;"></h2>
+  <div id="logBox"></div>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <h3>植愈空间 线上生长观察系统</h3>
+  </div>
+</footer>
+
+<script src="../js/common.js"></script>
+<script>
+const baseUrl = "http://localhost:3000/api";
+window.onload = async function(){
+  const params = new URLSearchParams(location.search);
+  const plantId = Number(params.get('id'));
+
+  // 校验ID是否为合法数字，拦截非法参数
+  if(isNaN(plantId)){
+    document.getElementById('logBox').innerHTML = '<p style="text-align:center;padding:40px;font-size:18px;color:red;">访问参数非法</p>';
+    return;
+  }
+
+  // 获取全部植物，校验植物是否存在
+  const plantRes = await fetch(`${baseUrl}/plant/all`);
+  const plantData = await plantRes.json();
+  const plantInfo = plantData.data.find(item=>item.id === plantId);
+  if(!plantInfo){
+    document.getElementById('plantName').innerText = '该植物不存在';
+    document.getElementById('logBox').innerHTML = '<p style="text-align:center;padding:40px;color:#666;">无此植物信息</p>';
+    return;
+  }
+  document.getElementById('plantName').innerText = `${plantInfo.name} — 生长记录相册`;
+
+  // 只筛选当前url携带plantId的生长记录，点对点核心代码
+  const logRes = await fetch(`${baseUrl}/plant/log/all`);
+  const logData = await logRes.json();
+  const list = logData.data.filter(log => log.plantId === plantId);
+  const box = document.getElementById('logBox');
+
+  if(list.length === 0){
+    box.innerHTML = '<p style="text-align:center;padding:40px;font-size:18px;color:#666;">管理员暂未上传该植物生长记录，敬请等待更新</p>';
+    return;
+  }
+  // 时间倒序，最新记录在最上方
+  list.reverse();
+  let html = '';
+  list.forEach(log=>{
+    html += `
+    <div class="card log-item">
+      <img class="log-img" src="../images/${log.img}">
+      <div>
+        <p style="color:#999;margin-bottom:8px;">${log.time}</p>
+        <p style="font-size:16px;line-height:1.7;">${log.desc}</p>
+      </div>
+    </div>`
+  })
+  box.innerHTML = html;
+}
+</script>
+</body>
+</html>

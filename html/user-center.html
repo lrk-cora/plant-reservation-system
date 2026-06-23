@@ -39,37 +39,57 @@
 // 渲染预约列表
 async function renderOrder() {
   const wrap = document.getElementById('orderListWrap')
-  const list = await ReserveDB.getAll()
-  if (list.length === 0) {
-    wrap.innerHTML = `<div class="card" style="padding:40px; text-align:center;">
-      <p style="font-size:18px; color:#666;">暂无预约记录</p>
-      <a href="plant-list.html"><button class="btn btn-green" style="margin-top:20px;">去预约植物</button></a>
-    </div>`
-    return
-  }
-  let html = ''
-  list.forEach(item => {
-    const typeText = item.reserveType === 'online' ? '线上云观植' : '线下到店种植'
-    html += `
-      <div class="card" style="padding:24px; margin-bottom:20px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-          <h3>${item.plantName}</h3>
-          <span style="background:#40916c; color:#fff; padding:4px 10px; border-radius:4px;">${typeText}</span>
+  try {
+    // 正确后端预约接口地址
+    const res = await fetch(`${baseUrl}/reserve/all`);
+    const result = await res.json();
+    const list = result.data;
+
+    if (list.length === 0) {
+      wrap.innerHTML = `<div class="card" style="padding:40px; text-align:center;">
+        <p style="font-size:18px; color:#666;">暂无预约记录</p>
+        <a href="plant-list.html"><button class="btn btn-green" style="margin-top:20px;">去预约植物</button></a>
+      </div>`
+      return
+    }
+    let html = ''
+    list.forEach(item => {
+      const typeText = item.reserveType === 'online' ? '线上云观植' : '线下到店种植'
+      html += `
+        <div class="card" style="padding:24px; margin-bottom:20px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <h3>${item.plantName}</h3>
+            <span style="background:#40916c; color:#fff; padding:4px 10px; border-radius:4px;">${typeText}</span>
+          </div>
+          <p>预约日期：${item.reserveDate} ${item.reserveTime}</p>
+          <p>联系人：${item.userName} | 电话：${item.phone}</p>
+          <p>提交时间：${item.createTime}</p>
+          ${item.remark ? `<p>备注：${item.remark}</p>` : ''}
+          <div style="display:flex; gap:12px; margin-top:14px;">
+          ${item.reserveType === 'online' 
+            ? `<a href="plant-log.html?id=${item.plantId}" target="_blank">
+                <button class="btn btn-green">查看生长记录</button>
+              </a>` 
+            : `<span style="color:#999; line-height:38px;">线下种植订单，无线上生长相册</span>`
+          }
+            <button class="btn" style="background:#e74c3c; color:#fff;" onclick="delOrder(${item.id})">取消预约</button>
+          </div>
         </div>
-        <p>预约日期：${item.reserveDate} ${item.reserveTime}</p>
-        <p>联系人：${item.userName} | 电话：${item.phone}</p>
-        <p>提交时间：${item.createTime}</p>
-        ${item.remark ? `<p>备注：${item.remark}</p>` : ''}
-        <button class="btn" style="background:#e74c3c; color:#fff; margin-top:14px;" onclick="delOrder(${item.id})">取消预约</button>
-      </div>
-    `
-  })
-  wrap.innerHTML = html
+      `
+    })
+    wrap.innerHTML = html
+  } catch (err) {
+    wrap.innerHTML = `<p style="color:red;">数据加载失败，请检查后端服务</p>`
+    console.error(err);
+  }
 }
+
 // 删除订单
 async function delOrder(id) {
   if (confirm('确定要取消这条预约吗？')) {
-    await ReserveDB.del(id)
+    await fetch(`${baseUrl}/reserve/del/${id}`, {
+      method: 'DELETE'
+    });
     renderOrder()
   }
 }

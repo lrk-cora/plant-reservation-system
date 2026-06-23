@@ -42,7 +42,6 @@
 
 <script src="../js/common.js"></script>
 <script>
-const baseUrl = "http://localhost:3000/api";
 let allPlantData = [];
 // 页面加载自动拉取后端植物数据
 window.onload = async function(){
@@ -71,7 +70,7 @@ function renderPlant(filterType){
         </div>
         <p style="color:${canBook?'#2d6a4f':'#999'};">${canBook?'可预约':'时段已满'}</p>
         ${canBook
-          ?`<a href="order.html?id=${item.id}"><button class="btn btn-green" style="width:100%;margin-top:12px;">立即预约</button></a>`
+          ?`<a href='order.html?id=${item.id}&type=${item.type}'><button class="btn btn-green" style="width:100%;padding:12px;border-radius:6px;border:0;">立即预约</button></a>`
           :`<button class="btn" style="width:100%;margin-top:12px;background:#eee;color:#999;cursor:not-allowed;">已满</button>`
         }
       </div>

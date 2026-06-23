@@ -25,19 +25,16 @@
     <form id="reserveForm">
       <div style="margin-bottom:20px;">
         <label style="display:block; margin-bottom:8px; font-weight:500;">预约类型</label>
-        <select name="reserveType" required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+        <select id="reserveType">
           <option value="online">线上云观植</option>
           <option value="offline">线下到店种植</option>
         </select>
       </div>
       <div style="margin-bottom:20px;">
-        <label style="display:block; margin-bottom:8px; font-weight:500;">选择植物</label>
-        <select name="plantName" required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
-          <option value="绿萝">绿萝</option>
-          <option value="多肉拼盘">多肉拼盘</option>
-          <option value="薄荷">薄荷</option>
-          <option value="向日葵">向日葵</option>
-        </select>
+        <p>选择植物</p>
+        <input id="plantNameInput" readonly style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;" placeholder="自动带入选中植物">
+        <!-- 隐藏存放植物id的输入框，提交要用，用户看不见 -->
+        <input type="hidden" id="plantIdInput">
       </div>
       <div style="margin-bottom:20px;">
         <label style="display:block; margin-bottom:8px; font-weight:500;">预约日期</label>
@@ -64,7 +61,7 @@
         <label style="display:block; margin-bottom:8px; font-weight:500;">备注（选填）</label>
         <textarea name="remark" rows="3" placeholder="特殊需求说明" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;"></textarea>
       </div>
-      <button type="submit" class="btn btn-green" style="width:100%; font-size:16px;">确认提交预约</button>
+      <button type="button" class="btn btn-green" style="width:100%; font-size:16px;" onclick="submitReserve()">确认提交预约</button>
     </form>
   </div>
 </main>
@@ -93,23 +90,81 @@
 
 <script src="../js/common.js"></script>
 <script>
-// 表单提交逻辑
-const form = document.getElementById('reserveForm')
-form.onsubmit = async function (e) {
-  e.preventDefault()
-  const formData = new FormData(form)
-  const dataObj = {}
-  for (let [k, v] of formData.entries()) {
-    dataObj[k] = v
+const plantNameMap = {};
+let targetPlantId = '';
+
+window.onload = async function(){
+  const params = new URLSearchParams(location.search);
+  targetPlantId = params.get('id');
+  const plantType = params.get('type');
+
+  const res = await fetch(`${baseUrl}/plant/all`);
+  const result = await res.json();
+  const plantList = result.data;
+  let targetPlant = null;
+
+  plantList.forEach(plant => {
+    plantNameMap[plant.id] = plant.name;
+    if(String(plant.id) === targetPlantId){
+      targetPlant = plant;
+    }
+  });
+
+  if(targetPlant){
+    document.getElementById('plantNameInput').value = targetPlant.name;
+    document.getElementById('plantIdInput').value = targetPlant.id;
   }
-  // 调用后端接口
-  const res = await ReserveDB.add(dataObj)
-  if (res.code === 200) {
-    showModal('successModal')
-    form.reset()
-  } else {
-    alert(res.msg || '预约失败，请重试')
+
+  // ========== 预约类型自动逻辑 ==========
+  const typeSelect = document.getElementById('reserveType');
+  if(plantType === 'online'){
+    typeSelect.value = 'online';
+    typeSelect.disabled = true; // 锁定线上
+  }else if(plantType === 'offline'){
+    typeSelect.value = 'offline';
+    typeSelect.disabled = true; // 锁定线下
+  }else if(plantType === 'both'){
+    typeSelect.disabled = false; // 双向，放开手动选择
   }
+}
+
+// 提交预约方法
+async function submitReserve(){
+  const reserveType = document.getElementById('reserveType').value;
+  const plantId = document.getElementById('plantIdInput').value;
+  // 下面全部改成name取值
+  const reserveDate = document.querySelector('[name="reserveDate"]').value;
+  const reserveTime = document.querySelector('[name="reserveTime"]').value;
+  const userName = document.querySelector('[name="userName"]').value;
+  const phone = document.querySelector('[name="phone"]').value;
+  const remark = document.querySelector('[name="remark"]').value;
+
+  if(!userName || !phone){
+    alert('姓名和手机号不能为空！');
+    return;
+  }
+  if(!reserveDate){
+    alert('请选择预约日期');
+    return;
+  }
+
+  const submitData = {
+    reserveType: reserveType,
+    plantId: Number(plantId),
+    plantName: plantNameMap[plantId],
+    reserveDate: reserveDate,
+    reserveTime: reserveTime,
+    userName: userName,
+    phone: phone,
+    remark: remark
+  };
+
+  await fetch(`${baseUrl}/reserve/add`, {
+    method: 'POST',
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify(submitData)
+  });
+  location.href = 'success.html';
 }
 </script>
 </body>

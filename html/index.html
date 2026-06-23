@@ -36,14 +36,18 @@
       <h2 style="font-size:24px; color:#2d6a4f; margin-bottom:16px;">线上预约 · 云端看植物生长</h2>
       <p style="color:#666; margin-bottom:12px;">无需到场，预约后可在线查看专属植物生长过程</p>
       <p style="color:#666; margin-bottom:24px;">每日生长照片、生长记录、长期观察</p>
-      <a href="plant-list.html?type=online"><button class="btn btn-green">立即预约观植</button></a>
+      <a href="order.html?id=${shturl.}&type=${item.type}">
+        <button class="btn btn-green" style="width: 100%; padding: 14px 0; font-size: 16px;">立即预约</button>
+      </a>
     </div>
     <!-- 线下种植卡片 -->
     <div class="card" style="padding:32px; text-align:center;">
       <h2 style="font-size:24px; color:#2d6a4f; margin-bottom:16px;">线下预约 · 到店亲手种植</h2>
       <p style="color:#666; margin-bottom:12px;">到实体种植场地，亲手选苗、种植、养护</p>
       <p style="color:#666; margin-bottom:24px;">场地、花盆、土壤、工具、专业指导全包</p>
-      <a href="plant-list.html?type=offline"><button class="btn btn-green">立即预约种植</button></a>
+      <a href="plant-list.html?type=offline">
+        <button class="btn btn-green" style="width: 100%; padding: 14px 0; font-size: 16px;">立即预约种植</button>
+      </a>
     </div>
   </section>
 
@@ -85,7 +89,8 @@ const typeMap = {online:"适合线上观察",offline:"适合新手种植",both:"
 window.onload = async function(){
   const res = await fetch(`${baseUrl}/plant/all`);
   const result = await res.json();
-  const plantList = result.data.slice(0,3); // 只展示前3个作为热门
+  // 只筛选正常可约的植物，全部展示，不再限制条数
+  const plantList = result.data.filter(item => item.status === 1);
   const wrap = document.getElementById('hotPlantWrap');
   let html = '';
 
@@ -101,7 +106,7 @@ window.onload = async function(){
           </div>
           <p style="color:${isOk ? '#2d6a4f':'#999'}; font-size:14px;">${isOk ? '可预约':'时段已满'}</p>
           ${isOk
-            ? `<a href="order.html?id=${item.id}"><button class="btn btn-outline" style="width:100%; margin-top:10px;">去预约</button></a>`
+            ? `<a href="order.html?id=${item.id}&type=${item.type}"><button class="btn btn-green" style="width:100%;padding:12px 0;">去预约</button></a>`
             : `<button class="btn" style="width:100%; margin-top:10px; background:#eee; color:#999; cursor:not-allowed;">已满</button>`
           }
         </div>

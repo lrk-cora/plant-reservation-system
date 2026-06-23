@@ -1,13 +1,59 @@
 {
-  "reserveList": [],
+  "reserveList": [
+    {
+      "id": 1782202635682,
+      "createTime": "2026/6/23 16:17:15",
+      "reserveType": "online",
+      "plantId": 1782202522798,
+      "plantName": "花",
+      "reserveDate": "2026-06-24",
+      "reserveTime": "09:00-11:00",
+      "userName": "’",
+      "phone": "67",
+      "remark": ""
+    }
+  ],
   "plantList": [
     {
-      "id": 1782188350061,
+      "id": 1782202522798,
       "name": "花",
       "type": "online",
       "desc": "无",
       "img": "flower.jpg",
       "status": 1
+    },
+    {
+      "id": 1782202543394,
+      "name": "草",
+      "type": "offline",
+      "desc": "无",
+      "img": "grass.jpg",
+      "status": 1
+    },
+    {
+      "id": 1782202579319,
+      "name": "瓶子",
+      "type": "both",
+      "desc": "无",
+      "img": "bottle.jpg",
+      "status": 0
+    },
+    {
+      "id": 1782202616001,
+      "name": "植株",
+      "type": "both",
+      "desc": "无",
+      "img": "plant.jpg",
+      "status": 1
+    }
+  ],
+  "plantLogList": [
+    {
+      "id": 1782202655584,
+      "plantId": 1782202522798,
+      "img": "flower.jpg",
+      "desc": "hao",
+      "time": "2026/6/23 16:17:35"
     }
   ]
 }
