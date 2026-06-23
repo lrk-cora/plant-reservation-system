@@ -1,0 +1,114 @@
+/* 全局重置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: "Microsoft Yahei", sans-serif;
+  background-color: #f8fbf8;
+  color: #333;
+  line-height: 1.6;
+}
+a {
+  text-decoration: none;
+  color: inherit;
+}
+ul {
+  list-style: none;
+}
+img {
+  max-width: 100%;
+  display: block;
+}
+.container {
+  width: 92%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* 导航栏通用 */
+.header-nav {
+  background: #2d6a4f;
+  color: #fff;
+  padding: 14px 0;
+  position: sticky;
+  top: 0;
+  z-index: 99;
+}
+.nav-wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.logo {
+  font-size: 22px;
+  font-weight: bold;
+}
+.nav-links {
+  display: flex;
+  gap: 28px;
+}
+.nav-links a:hover {
+  color: #b7e4c7;
+}
+
+/* 按钮通用 */
+.btn {
+  padding: 10px 22px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  transition: 0.2s;
+}
+.btn-green {
+  background: #40916c;
+  color: white;
+}
+.btn-green:hover {
+  background: #2d6a4f;
+}
+.btn-outline {
+  border: 1px solid #40916c;
+  color: #40916c;
+  background: transparent;
+}
+
+/* 卡片通用 */
+.card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+
+/* 页脚 */
+.footer {
+  margin-top: 60px;
+  padding: 40px 0;
+  background: #1b4332;
+  color: #ccc;
+  font-size: 14px;
+}
+
+/* 弹窗遮罩 */
+.mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.mask.show {
+  display: flex;
+}
+.modal {
+  width: 90%;
+  max-width: 500px;
+  background: white;
+  border-radius: 10px;
+  padding: 24px;
+}

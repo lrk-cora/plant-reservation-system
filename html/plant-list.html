@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>全部可预约植物 | 植愈空间</title>
+  <link rel="stylesheet" href="../css/common.css">
+</head>
+<body>
+<header class="header-nav">
+  <div class="container nav-wrap">
+    <a href="index.html" class="logo">植愈空间</a>
+    <ul class="nav-links">
+      <li><a href="index.html">首页</a></li>
+      <li><a href="plant-list.html">全部植物</a></li>
+      <li><a href="rule.html">预约须知</a></li>
+      <li><a href="user-center.html">我的预约</a></li>
+    </ul>
+  </div>
+</header>
+
+<main class="container" style="padding:30px 0;">
+  <h1 style="font-size:28px; margin-bottom:24px;">全部可预约植物</h1>
+  <div style="display:flex; gap:12px; margin-bottom:30px;">
+    <button class="btn btn-green filter-item" data-filter="all">全部</button>
+    <button class="btn btn-outline filter-item" data-filter="online">仅线上观植</button>
+    <button class="btn btn-outline filter-item" data-filter="offline">仅线下种植</button>
+    <button class="btn btn-outline filter-item" data-filter="both">双向体验</button>
+  </div>
+  <div id="plantWrap" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(240px,1fr)); gap:24px;"></div>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <h3 style="margin-bottom:12px;">植愈空间 植物预约基地</h3>
+    <p>地址：XX市XX区园艺产业园3号大棚</p>
+    <p>联系电话：138-XXXX-XXXX</p>
+    <p>营业时间：9:00-18:00</p>
+    <a href="rule.html" style="text-decoration:underline;">完整预约规则</a>
+  </div>
+</footer>
+
+<script src="../js/common.js"></script>
+<script>
+const baseUrl = "http://localhost:3000/api";
+let allPlantData = [];
+// 页面加载自动拉取后端植物数据
+window.onload = async function(){
+  const res = await fetch(`${baseUrl}/plant/all`);
+  const result = await res.json();
+  allPlantData = result.data;
+  renderPlant("all");
+}
+// 渲染植物卡片
+function renderPlant(filterType){
+  const wrap = document.getElementById('plantWrap');
+  const typeMap = {online:"线上观植",offline:"线下种植",both:"双向"};
+  let list = allPlantData;
+  if(filterType !== "all") list = allPlantData.filter(item=>item.type === filterType);
+
+  let html = '';
+  list.forEach(item=>{
+    const canBook = item.status === 1;
+    html += `
+    <div class="card plant-item" data-type="${item.type}">
+      <div style="height:180px;background:url(../images/${item.img}) center/cover no-repeat;"></div>
+      <div style="padding:18px;">
+        <h3>${item.name}</h3>
+        <div style="margin:10px 0;">
+          <span style="background:#74c69d;color:#fff;padding:3px 8px;border-radius:4px;font-size:12px;">${typeMap[item.type]}</span>
+        </div>
+        <p style="color:${canBook?'#2d6a4f':'#999'};">${canBook?'可预约':'时段已满'}</p>
+        ${canBook
+          ?`<a href="order.html?id=${item.id}"><button class="btn btn-green" style="width:100%;margin-top:12px;">立即预约</button></a>`
+          :`<button class="btn" style="width:100%;margin-top:12px;background:#eee;color:#999;cursor:not-allowed;">已满</button>`
+        }
+      </div>
+    </div>`
+  })
+  wrap.innerHTML = html || '<p>暂无对应植物</p>';
+}
+// 筛选按钮事件
+const filterBtns = document.querySelectorAll('.filter-item')
+filterBtns.forEach(btn => {
+  btn.onclick = function() {
+    const type = this.dataset.filter
+    filterBtns.forEach(b => {
+      b.classList.remove('btn-green')
+      b.classList.add('btn-outline')
+    })
+    this.classList.remove('btn-outline')
+    this.classList.add('btn-green')
+    renderPlant(type)
+  }
+})
+</script>
+</body>
+</html>
