@@ -1,9 +1,10 @@
 # 依赖包文件夹，绝对不要上传
 node_modules/
-package-lock.json
 
 # 本地数据库文件（本地数据，每个人本地独立，不用上传仓库）
 data.json
+*.db
+*.db-journal
 
 # VSCode编辑器配置文件
 .vscode/
