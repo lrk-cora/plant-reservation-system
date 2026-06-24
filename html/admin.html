@@ -139,6 +139,7 @@ function switchTab(num){
 }
 
 // ========== 预约管理 ==========
+// ========== 预约管理（修改后的完整函数） ==========
 async function renderReserve(){
   const res = await fetch(`${baseUrl}/reserve/all`);
   const result = await res.json();
@@ -146,7 +147,19 @@ async function renderReserve(){
   let html = '';
   list.forEach(item=>{
     const typeName = item.reserveType==='online'?'线上观植':'线下种植';
-    html += `<tr>
+    // 判断是否管理员已取消
+    const isCancel = item.status === 0;
+    // 已取消行标浅红色底色
+    const rowBg = isCancel ? 'background-color:#ffe6e6;' : '';
+    // 按钮判断：已取消则灰色禁用，正常显示删除按钮
+    let btnHtml = '';
+    if(isCancel){
+      btnHtml = `<button disabled style="background:#cccccc;color:#777;border:none;padding:6px 10px;border-radius:4px;">已取消</button>`;
+    }else{
+      btnHtml = `<button class="btn-red" onclick="delReserve(${item.id})">删除</button>`;
+    }
+
+    html += `<tr style="${rowBg}">
       <td>${item.id}</td>
       <td>${item.userName}</td>
       <td>${item.phone}</td>
@@ -154,33 +167,35 @@ async function renderReserve(){
       <td>${typeName}</td>
       <td>${item.reserveDate} ${item.reserveTime}</td>
       <td>${item.createTime}</td>
-      <td><button class="btn-red" onclick="delReserve(${item.id})">删除</button></td>
+      <td>${btnHtml}</td>
     </tr>`
   })
   document.getElementById('reserveTable').innerHTML = html || '<tr><td colspan="8">暂无预约数据</td></tr>';
 }
 async function delReserve(id){
-  if(!confirm("确定删除该预约？")) return;
-  await fetch(`${baseUrl}/reserve/del/${id}`,{method:"DELETE"});
+  if(!confirm("确定要取消该用户预约吗？取消后用户前台会收到失败通知")) return;
+  // 调用软取消接口
+  await fetch(`${baseUrl}/reserve/cancel/${id}`,{method:"PUT"});
   renderReserve();
 }
 
 // ========== 植物管理 ==========
+// ========== 植物管理（修复后的正确代码） ==========
 async function renderPlant(){
   const res = await fetch(`${baseUrl}/plant/all`);
   const result = await res.json();
-  allPlantList = result.data; // 必须赋值全局变量
+  allPlantList = result.data;
   const list = allPlantList;
   let html = '';
-  const typeMap = {online:"线上",offline:"线下",both:"双向"};
+  const typeMap = {online:"线上观植",offline:"线下种植",both:"双向可用"};
+  const statusMap = {1:"正常可预约",0:"已下架"};
   list.forEach(item=>{
-    const statusText = item.status===1 ? "正常可约" : "已下架";
     html += `<tr>
       <td>${item.id}</td>
       <td>${item.name}</td>
       <td>${typeMap[item.type]}</td>
       <td>${item.desc}</td>
-      <td>${statusText}</td>
+      <td>${statusMap[item.status]}</td>
       <td><button class="btn-red" onclick="delPlant(${item.id})">删除</button></td>
     </tr>`
   })

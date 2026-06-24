@@ -1,21 +1,51 @@
 {
   "reserveList": [
     {
-      "id": 1782202635682,
-      "createTime": "2026/6/23 16:17:15",
+      "id": 1782273099743,
+      "createTime": "2026/6/24 11:51:39",
       "reserveType": "online",
-      "plantId": 1782202522798,
+      "plantId": 1782273047789,
       "plantName": "花",
-      "reserveDate": "2026-06-24",
+      "reserveDate": "2026-06-25",
       "reserveTime": "09:00-11:00",
       "userName": "’",
       "phone": "67",
+      "remark": "",
+      "status": 0,
+      "cancelMsg": "因时段名额已满，本次预约未成功，期待您下次预约！"
+    },
+    {
+      "id": 1782274188689,
+      "createTime": "2026/6/24 12:09:48",
+      "status": 1,
+      "cancelMsg": "",
+      "reserveType": "online",
+      "plantId": 1782273060474,
+      "plantName": "草",
+      "reserveDate": "2026-06-26",
+      "reserveTime": "09:00-11:00",
+      "userName": "’",
+      "phone": "67",
+      "remark": ""
+    },
+    {
+      "id": 1782274830286,
+      "createTime": "2026/6/24 12:20:30",
+      "status": 1,
+      "cancelMsg": "",
+      "reserveType": "online",
+      "plantId": 1782273047789,
+      "plantName": "花",
+      "reserveDate": "2026-06-25",
+      "reserveTime": "09:00-11:00",
+      "userName": "’",
+      "phone": "123",
       "remark": ""
     }
   ],
   "plantList": [
     {
-      "id": 1782202522798,
+      "id": 1782273047789,
       "name": "花",
       "type": "online",
       "desc": "无",
@@ -23,37 +53,21 @@
       "status": 1
     },
     {
-      "id": 1782202543394,
+      "id": 1782273060474,
       "name": "草",
-      "type": "offline",
+      "type": "online",
       "desc": "无",
       "img": "grass.jpg",
       "status": 1
     },
     {
-      "id": 1782202579319,
-      "name": "瓶子",
-      "type": "both",
-      "desc": "无",
-      "img": "bottle.jpg",
-      "status": 0
-    },
-    {
-      "id": 1782202616001,
+      "id": 1782273078086,
       "name": "植株",
-      "type": "both",
+      "type": "offline",
       "desc": "无",
       "img": "plant.jpg",
       "status": 1
     }
   ],
-  "plantLogList": [
-    {
-      "id": 1782202655584,
-      "plantId": 1782202522798,
-      "img": "flower.jpg",
-      "desc": "hao",
-      "time": "2026/6/23 16:17:35"
-    }
-  ]
+  "plantLogList": []
 }

@@ -36,18 +36,48 @@
 
 <script src="../js/common.js"></script>
 <script>
-// 渲染预约列表
+// 全局存列表，方便delOrder读取
+// 全局存列表，方便delOrder读取
+let orderList = [];
+
+// 页面载入优先执行手机号校验弹窗
+window.onload = function(){
+  checkPhoneLogin();
+}
+
+// 手机号登录弹窗函数
+function checkPhoneLogin(){
+  // 读取本地缓存手机号
+  let phone = localStorage.getItem("currentUserPhone");
+  // 没有手机号，强制弹窗输入
+  if(!phone){
+    phone = prompt("请输入您预约时填写的手机号，查看个人预约订单：");
+    // 用户点取消/空输入，跳转首页
+    if(!phone || phone.trim() === ""){
+      alert("手机号不能为空，即将返回首页");
+      location.href = "index.html";
+      return;
+    }
+    // 把手机号存入本地缓存，下次免输
+    localStorage.setItem("currentUserPhone", phone.trim());
+  }
+  // 校验完成，加载个人订单
+  renderOrder();
+}
+
+// 渲染个人预约列表
 async function renderOrder() {
   const wrap = document.getElementById('orderListWrap')
+  const myPhone = localStorage.getItem("currentUserPhone");
   try {
-    // 正确后端预约接口地址
-    const res = await fetch(`${baseUrl}/reserve/all`);
+    const res = await fetch(`${baseUrl}/reserve/my?phone=${myPhone}`);
     const result = await res.json();
     const list = result.data;
+    orderList = list;
 
     if (list.length === 0) {
       wrap.innerHTML = `<div class="card" style="padding:40px; text-align:center;">
-        <p style="font-size:18px; color:#666;">暂无预约记录</p>
+        <p style="font-size:18px; color:#666;">该手机号暂无预约记录</p>
         <a href="plant-list.html"><button class="btn btn-green" style="margin-top:20px;">去预约植物</button></a>
       </div>`
       return
@@ -55,45 +85,77 @@ async function renderOrder() {
     let html = ''
     list.forEach(item => {
       const typeText = item.reserveType === 'online' ? '线上云观植' : '线下到店种植'
+      const isCancel = item.status === 0;
+      const msgText = item.cancelMsg || "因时段名额已满，本次预约未成功，期待您下次预约！";
+
       html += `
-        <div class="card" style="padding:24px; margin-bottom:20px;">
+        <div class="card" style="padding:24px; margin-bottom:20px; ${isCancel ? 'border:2px solid #e74c3c;' : ''}">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
             <h3>${item.plantName}</h3>
             <span style="background:#40916c; color:#fff; padding:4px 10px; border-radius:4px;">${typeText}</span>
           </div>
+          ${isCancel ? `<p style="color:#e74c3c; font-weight:bold; font-size:16px;">通知：${msgText}</p>` : ''}
           <p>预约日期：${item.reserveDate} ${item.reserveTime}</p>
           <p>联系人：${item.userName} | 电话：${item.phone}</p>
           <p>提交时间：${item.createTime}</p>
           ${item.remark ? `<p>备注：${item.remark}</p>` : ''}
-          <div style="display:flex; gap:12px; margin-top:14px;">
-          ${item.reserveType === 'online' 
-            ? `<a href="plant-log.html?id=${item.plantId}" target="_blank">
-                <button class="btn btn-green">查看生长记录</button>
-              </a>` 
-            : `<span style="color:#999; line-height:38px;">线下种植订单，无线上生长相册</span>`
-          }
-            <button class="btn" style="background:#e74c3c; color:#fff;" onclick="delOrder(${item.id})">取消预约</button>
+          <div style="display:flex; gap:12px; margin-top:14px; align-items:center;">
+            ${item.reserveType === 'online' && !isCancel
+              ? `<a href="plant-log.html?id=${item.plantId}" target="_blank">
+                  <button class="btn btn-green">查看生长记录</button>
+                </a>` 
+              : isCancel 
+                ? `<span style="color:#999;">预约已取消，无法查看记录</span>`
+                : `<span style="color:#999;">线下种植订单，无线上生长相册</span>`
+            }
+            ${
+              isCancel
+              ? `<button disabled style="background:#cccccc; color:#888; border:none; padding:8px 16px;">取消预约</button>`
+              : `<button class="btn" style="background:#e74c3c; color:#fff;" onclick="delOrder(${item.id})">取消预约</button>`
+            }
           </div>
         </div>
       `
     })
     wrap.innerHTML = html
   } catch (err) {
-    wrap.innerHTML = `<p style="color:red;">数据加载失败，请检查后端服务</p>`
+    wrap.innerHTML = `<p style="color:red;">数据加载失败，请确认后端接口已添加并重启服务</p>`
     console.error(err);
   }
 }
 
-// 删除订单
-async function delOrder(id) {
-  if (confirm('确定要取消这条预约吗？')) {
-    await fetch(`${baseUrl}/reserve/del/${id}`, {
-      method: 'DELETE'
+// 用户删除自己的订单
+async function delOrder(id){
+  const targetOrder = orderList.find(item => item.id === id);
+  if (!targetOrder) {
+    alert("该预约订单已不存在，页面即将刷新");
+    renderOrder();
+    return;
+  }
+  if (targetOrder.status === 0) {
+    alert("该预约已被管理员取消，无法再次操作");
+    return;
+  }
+  if(!confirm("确定取消本次预约？取消后该订单会彻底删除")) return;
+  try {
+    const res = await fetch(`${baseUrl}/reserve/del/${id}`,{
+      method:"DELETE",
+      headers: {"Content-Type": "application/json"}
     });
-    renderOrder()
+    const result = await res.json();
+    if(result.code === 200){
+      alert("预约取消成功！");
+      renderOrder();
+    }else{
+      alert(result.msg || "取消失败，请重试");
+      renderOrder();
+    }
+  } catch (err) {
+    console.error(err);
+    alert("请求异常，页面自动刷新");
+    renderOrder();
   }
 }
-window.onload = renderOrder
 </script>
 </body>
 </html>

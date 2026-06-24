@@ -46,18 +46,16 @@
 
 <script src="../js/common.js"></script>
 <script>
-const baseUrl = "http://localhost:3000/api";
 window.onload = async function(){
   const params = new URLSearchParams(location.search);
   const plantId = Number(params.get('id'));
 
-  // 校验ID是否为合法数字，拦截非法参数
   if(isNaN(plantId)){
     document.getElementById('logBox').innerHTML = '<p style="text-align:center;padding:40px;font-size:18px;color:red;">访问参数非法</p>';
     return;
   }
 
-  // 获取全部植物，校验植物是否存在
+  // 获取全部植物
   const plantRes = await fetch(`${baseUrl}/plant/all`);
   const plantData = await plantRes.json();
   const plantInfo = plantData.data.find(item=>item.id === plantId);
@@ -68,7 +66,7 @@ window.onload = async function(){
   }
   document.getElementById('plantName').innerText = `${plantInfo.name} — 生长记录相册`;
 
-  // 只筛选当前url携带plantId的生长记录，点对点核心代码
+  // 筛选对应植物的日志
   const logRes = await fetch(`${baseUrl}/plant/log/all`);
   const logData = await logRes.json();
   const list = logData.data.filter(log => log.plantId === plantId);
@@ -78,7 +76,6 @@ window.onload = async function(){
     box.innerHTML = '<p style="text-align:center;padding:40px;font-size:18px;color:#666;">管理员暂未上传该植物生长记录，敬请等待更新</p>';
     return;
   }
-  // 时间倒序，最新记录在最上方
   list.reverse();
   let html = '';
   list.forEach(log=>{

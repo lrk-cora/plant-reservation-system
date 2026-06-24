@@ -129,10 +129,10 @@ window.onload = async function(){
 }
 
 // 提交预约方法
+// 提交预约方法
 async function submitReserve(){
   const reserveType = document.getElementById('reserveType').value;
   const plantId = document.getElementById('plantIdInput').value;
-  // 下面全部改成name取值
   const reserveDate = document.querySelector('[name="reserveDate"]').value;
   const reserveTime = document.querySelector('[name="reserveTime"]').value;
   const userName = document.querySelector('[name="userName"]').value;
@@ -164,6 +164,8 @@ async function submitReserve(){
     headers: {"Content-Type":"application/json"},
     body: JSON.stringify(submitData)
   });
+  // ========= 新增代码：把本次手机号存入本地 =========
+  localStorage.setItem("currentUserPhone", phone);
   location.href = 'success.html';
 }
 </script>
